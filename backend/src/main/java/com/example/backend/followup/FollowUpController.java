@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -19,6 +18,9 @@ public class FollowUpController {
 
     private final FollowUpService followUpService;
 
+    /*
+     * CREATE ENDPOINT
+     */
     @PostMapping
     public ResponseEntity<FollowUpResponse> createFollowUp(
             @RequestBody FollowUpRequest request) {
@@ -28,6 +30,9 @@ public class FollowUpController {
                 .body(followUpService.createFollowUp(request));
     }
 
+    /*
+     * GET ENDPOINTS (RETRIEVAL & FILTERS)
+     */
     @GetMapping
     public ResponseEntity<List<FollowUpResponse>> getAllFollowUps() {
 
@@ -54,6 +59,41 @@ public class FollowUpController {
         );
     }
 
+    @GetMapping("/pending")
+    public ResponseEntity<List<FollowUpResponse>> getPendingFollowUps() {
+
+        return ResponseEntity.ok(
+                followUpService.getPendingFollowUps()
+        );
+    }
+
+    @GetMapping("/today")
+    public ResponseEntity<List<FollowUpResponse>> getTodayFollowUps() {
+
+        return ResponseEntity.ok(
+                followUpService.getTodayFollowUps()
+        );
+    }
+
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<FollowUpResponse>> getUpcomingFollowUps() {
+
+        return ResponseEntity.ok(
+                followUpService.getUpcomingFollowUps()
+        );
+    }
+
+    @GetMapping("/overdue")
+    public ResponseEntity<List<FollowUpResponse>> getOverdueFollowUps() {
+
+        return ResponseEntity.ok(
+                followUpService.getOverdueFollowUps()
+        );
+    }
+
+    /*
+     * PATCH ENDPOINTS (STATUS & DATE UPDATES)
+     */
     @PatchMapping("/{id}/complete")
     public ResponseEntity<String> completeFollowUp(
             @PathVariable Long id) {
@@ -75,16 +115,17 @@ public class FollowUpController {
                 "Follow-up marked as missed"
         );
     }
-@PatchMapping("/{id}/reschedule")
-public ResponseEntity<FollowUpResponse> rescheduleFollowUp(
-        @PathVariable Long id,
-        @RequestBody RescheduleRequest request) {
 
-    return ResponseEntity.ok(
-            followUpService.rescheduleFollowUp(
-                    id,
-                    request.getNewDate()
-            )
-    );
-}
+    @PatchMapping("/{id}/reschedule")
+    public ResponseEntity<FollowUpResponse> rescheduleFollowUp(
+            @PathVariable Long id,
+            @RequestBody RescheduleRequest request) {
+
+        return ResponseEntity.ok(
+                followUpService.rescheduleFollowUp(
+                        id,
+                        request.getNewDate()
+                )
+        );
+    }
 }

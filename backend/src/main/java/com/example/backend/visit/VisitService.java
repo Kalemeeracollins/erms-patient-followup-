@@ -2,8 +2,14 @@ package com.example.backend.visit;
 
 import com.example.backend.patient.Patient;
 import com.example.backend.patient.PatientRepository;
+// Make sure these imports match your actual follow-up model/repository package locations
+import com.example.backend.followup.FollowUp;
+import com.example.backend.followup.FollowUpRepository;
+import com.example.backend.followup.FollowUpStatus; 
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Year;
 import java.util.List;
@@ -15,7 +21,9 @@ public class VisitService {
 
     private final VisitRepository visitRepository;
     private final PatientRepository patientRepository;
+    private final FollowUpRepository followUpRepository; // Added dependency
 
+    @Transactional // Ensures database atomicity for both saves
     public VisitResponse createVisit(VisitRequest request) {
 
         Patient patient = patientRepository.findById(request.getPatientId())
@@ -33,7 +41,24 @@ public class VisitService {
                 .nextReviewDate(request.getNextReviewDate())
                 .build();
 
-        return toResponse(visitRepository.save(visit));
+        // Save the primary visit record first
+        Visit savedVisit = visitRepository.save(visit);
+
+        // Handle conditional follow-up creation logic
+        if (Boolean.TRUE.equals(savedVisit.getFollowUpRequired())) {
+            FollowUp followUp = FollowUp.builder()
+                    .patient(savedVisit.getPatient())
+                    .visit(savedVisit)
+                    .followUpDate(savedVisit.getNextReviewDate())
+                    .reason(savedVisit.getDiagnosis())
+                    .status(FollowUpStatus.PENDING)
+                    .notificationSent(false)
+                    .build();
+
+            followUpRepository.save(followUp);
+        }
+
+        return toResponse(savedVisit);
     }
 
     public List<VisitResponse> getAllVisits() {
@@ -50,16 +75,13 @@ public class VisitService {
     }
 
     public List<VisitResponse> getVisitsByPatient(Long patientId) {
-
-    return visitRepository.findByPatient_Id(patientId)
-            .stream()
-            .map(this::toResponse)
-            .toList();
-}
-    
+        return visitRepository.findByPatient_Id(patientId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
 
     private String generateVisitNumber() {
-
         long count = visitRepository.count() + 1;
 
         return "VIS-" +
@@ -69,7 +91,6 @@ public class VisitService {
     }
 
     private VisitResponse toResponse(Visit visit) {
-
         return VisitResponse.builder()
                 .id(visit.getId())
                 .visitNumber(visit.getVisitNumber())

@@ -1,0 +1,15 @@
+POST /followups
+{
+  "patientId": 1,
+  "visitId": 1,
+  "followUpDate": "2026-06-25",
+  "reason": "Malaria Review",
+  "notes": "Check recovery progress"
+}
+
+GET /followups
+GET /followups/patient/1
+PATCH /followups/{id}/complete
+PATCH /followups/{id}/missed
+PATCH /followups/{id}/cancel
+PATCH /followups/{id}/status

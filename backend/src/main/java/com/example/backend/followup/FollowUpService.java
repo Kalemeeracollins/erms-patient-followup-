@@ -5,11 +5,7 @@ import com.example.backend.patient.PatientRepository;
 import com.example.backend.visit.Visit;
 import com.example.backend.visit.VisitRepository;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -89,8 +85,7 @@ public class FollowUpService {
      */
     public List<FollowUpResponse> getPendingFollowUps() {
 
-        return followUpRepository.findByStatus(
-                        FollowUpStatus.PENDING)
+        return followUpRepository.findByStatus(FollowUpStatus.PENDING)
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
@@ -104,6 +99,42 @@ public class FollowUpService {
         return followUpRepository.findByFollowUpDateAndStatus(
                         LocalDate.now(),
                         FollowUpStatus.PENDING)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    /*
+     * GET TODAY FOLLOWUPS (ALL STATUSES)
+     */
+    public List<FollowUpResponse> getTodayFollowUps() {
+
+        return followUpRepository.findByFollowUpDate(LocalDate.now())
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    /*
+     * GET UPCOMING FOLLOWUPS
+     */
+    public List<FollowUpResponse> getUpcomingFollowUps() {
+
+        return followUpRepository.findByFollowUpDateAfter(LocalDate.now())
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    /*
+     * GET OVERDUE FOLLOWUPS
+     */
+    public List<FollowUpResponse> getOverdueFollowUps() {
+
+        return followUpRepository.findByFollowUpDateBeforeAndStatus(
+                        LocalDate.now(),
+                        FollowUpStatus.PENDING
+                )
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
@@ -137,7 +168,23 @@ public class FollowUpService {
         followUpRepository.save(followUp);
     }
 
-     
+    /*
+     * RESCHEDULE FOLLOWUP
+     */
+    public FollowUpResponse rescheduleFollowUp(Long id, LocalDate newDate) {
+
+        FollowUp followUp = followUpRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Follow-up not found"));
+
+        followUp.setFollowUpDate(newDate);
+        followUp.setStatus(FollowUpStatus.RESCHEDULED);
+
+        FollowUp updated = followUpRepository.save(followUp);
+
+        return mapToResponse(updated);
+    }
+
     /*
      * RESPONSE MAPPER
      */
@@ -155,26 +202,7 @@ public class FollowUpService {
                 .followUpDate(followUp.getFollowUpDate())
                 .reason(followUp.getReason())
                 .status(followUp.getStatus().name())
-                .notificationSent(
-                        followUp.getNotificationSent()
-                )
+                .notificationSent(followUp.getNotificationSent())
                 .build();
     }
-
-    /*
-     * RESCHEDULE FOLLOWUP
-     */
-    public FollowUpResponse rescheduleFollowUp(Long id, LocalDate newDate) {
-
-    FollowUp followUp = followUpRepository.findById(id)
-            .orElseThrow(() ->
-                    new RuntimeException("Follow-up not found"));
-
-    followUp.setFollowUpDate(newDate);
-    followUp.setStatus(FollowUpStatus.RESCHEDULED);
-
-    FollowUp updated = followUpRepository.save(followUp);
-
-    return mapToResponse(updated);
-}
 }

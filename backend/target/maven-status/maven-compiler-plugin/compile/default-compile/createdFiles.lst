@@ -14,6 +14,7 @@ com\example\backend\patient\Gender.class
 com\example\backend\visit\Visit.class
 com\example\backend\notification\Notification.class
 com\example\backend\user\User.class
+com\example\backend\dashboard\DashboardResponse$DashboardResponseBuilder.class
 com\example\backend\auth\dto\LoginRequest.class
 com\example\backend\user\UserController.class
 com\example\backend\followup\FollowUp$FollowUpBuilder.class
@@ -26,6 +27,7 @@ com\example\backend\notification\Notification$NotificationBuilder.class
 com\example\backend\notification\NotificationResponse.class
 com\example\backend\followup\FollowUp.class
 com\example\backend\security\SecurityConfig.class
+com\example\backend\dashboard\DashboardService.class
 com\example\backend\followup\FollowUpStatus.class
 com\example\backend\user\dto\UserDTO$UserDTOBuilder.class
 com\example\backend\visit\VisitService.class
@@ -34,6 +36,7 @@ com\example\backend\patient\Patient$PatientBuilder.class
 com\example\backend\user\dto\UserDTO.class
 com\example\backend\auth\AuthController.class
 com\example\backend\followup\FollowUpResponse.class
+com\example\backend\dashboard\DashboardResponse.class
 com\example\backend\audit\AuditService.class
 com\example\backend\patient\PatientController.class
 com\example\backend\visit\VisitResponse.class
@@ -45,6 +48,7 @@ com\example\backend\visit\Visit$VisitBuilder.class
 com\example\backend\visit\VisitEntity.class
 com\example\backend\user\UserService.class
 com\example\backend\notification\NotificationChannel.class
+com\example\backend\dashboard\DashboardController.class
 com\example\backend\patient\Patient.class
 com\example\backend\patient\PatientEntity$PatientEntityBuilder.class
 com\example\backend\notification\NotificationRepository.class
