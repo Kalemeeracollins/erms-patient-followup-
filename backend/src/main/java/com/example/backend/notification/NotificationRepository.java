@@ -11,4 +11,6 @@ public interface NotificationRepository
 
     List<Notification> findBySent(Boolean sent);
 
+    long countBySent(Boolean sent);
+
 }

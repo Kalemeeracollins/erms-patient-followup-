@@ -171,18 +171,38 @@ public class FollowUpService {
     /*
      * RESCHEDULE FOLLOWUP
      */
-    public FollowUpResponse rescheduleFollowUp(Long id, LocalDate newDate) {
+    public FollowUpResponse rescheduleFollowUp(Long id, LocalDate newDate, String reason) {
 
         FollowUp followUp = followUpRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Follow-up not found"));
 
         followUp.setFollowUpDate(newDate);
-        followUp.setStatus(FollowUpStatus.RESCHEDULED);
+        followUp.setStatus(FollowUpStatus.PENDING);
+        followUp.setNotificationSent(false);
+        if (reason != null && !reason.isBlank()) {
+            followUp.setNotes(reason);
+        }
 
         FollowUp updated = followUpRepository.save(followUp);
 
         return mapToResponse(updated);
+    }
+
+    public void cancelFollowUp(Long id) {
+        FollowUp followUp = followUpRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Follow-up not found"));
+
+        followUp.setStatus(FollowUpStatus.CANCELLED);
+        followUpRepository.save(followUp);
+    }
+
+    public void markNotificationSent(Long followUpId) {
+        followUpRepository.findById(followUpId).ifPresent(followUp -> {
+            followUp.setNotificationSent(true);
+            followUpRepository.save(followUp);
+        });
     }
 
     /*

@@ -24,4 +24,10 @@ public class VisitResponse {
     private Boolean followUpRequired;
 
     private LocalDate nextReviewDate;
+
+    private String reasonForVisit;
+
+    private String treatment;
+
+    private String notes;
 }

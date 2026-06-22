@@ -24,6 +24,8 @@ E:\erms-patient-followup\backend\src\main\java\com\example\backend\HospitalFollo
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\notification\Notification.java
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\notification\NotificationChannel.java
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\notification\NotificationController.java
+E:\erms-patient-followup\backend\src\main\java\com\example\backend\notification\NotificationDeliveryService.java
+E:\erms-patient-followup\backend\src\main\java\com\example\backend\notification\NotificationProperties.java
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\notification\NotificationRepository.java
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\notification\NotificationRequest.java
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\notification\NotificationResponse.java
@@ -47,6 +49,7 @@ E:\erms-patient-followup\backend\src\main\java\com\example\backend\security\JwtA
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\security\JwtAuthenticationFilter.java
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\security\JwtService.java
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\security\SecurityConfig.java
+E:\erms-patient-followup\backend\src\main\java\com\example\backend\user\dto\CreateUserRequest.java
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\user\dto\UserDTO.java
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\user\Role.java
 E:\erms-patient-followup\backend\src\main\java\com\example\backend\user\User.java

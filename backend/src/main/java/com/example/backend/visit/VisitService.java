@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Year;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,6 +82,69 @@ public class VisitService {
                 .toList();
     }
 
+    @Transactional
+    public VisitResponse updateVisit(Long id, VisitRequest request) {
+        Visit visit = visitRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Visit not found"));
+
+        if (request.getVisitDate() != null) {
+            visit.setVisitDate(request.getVisitDate());
+        }
+        if (request.getReasonForVisit() != null) {
+            visit.setReasonForVisit(request.getReasonForVisit());
+        }
+        if (request.getDiagnosis() != null) {
+            visit.setDiagnosis(request.getDiagnosis());
+        }
+        if (request.getTreatment() != null) {
+            visit.setTreatment(request.getTreatment());
+        }
+        if (request.getNotes() != null) {
+            visit.setNotes(request.getNotes());
+        }
+        if (request.getFollowUpRequired() != null) {
+            visit.setFollowUpRequired(request.getFollowUpRequired());
+        }
+        if (request.getNextReviewDate() != null) {
+            visit.setNextReviewDate(request.getNextReviewDate());
+        }
+
+        Visit saved = visitRepository.save(visit);
+        syncFollowUpForVisit(saved);
+        return toResponse(saved);
+    }
+
+    private void syncFollowUpForVisit(Visit visit) {
+        List<FollowUp> existing = followUpRepository.findByVisit_Id(visit.getId());
+        Optional<FollowUp> activeFollowUp = existing.stream()
+                .filter(f -> f.getStatus() == FollowUpStatus.PENDING
+                        || f.getStatus() == FollowUpStatus.RESCHEDULED)
+                .findFirst();
+
+        if (Boolean.TRUE.equals(visit.getFollowUpRequired()) && visit.getNextReviewDate() != null) {
+            if (activeFollowUp.isPresent()) {
+                FollowUp followUp = activeFollowUp.get();
+                followUp.setFollowUpDate(visit.getNextReviewDate());
+                followUp.setReason(visit.getDiagnosis());
+                followUpRepository.save(followUp);
+            } else {
+                FollowUp followUp = FollowUp.builder()
+                        .patient(visit.getPatient())
+                        .visit(visit)
+                        .followUpDate(visit.getNextReviewDate())
+                        .reason(visit.getDiagnosis())
+                        .status(FollowUpStatus.PENDING)
+                        .notificationSent(false)
+                        .build();
+                followUpRepository.save(followUp);
+            }
+        } else if (activeFollowUp.isPresent()) {
+            FollowUp followUp = activeFollowUp.get();
+            followUp.setStatus(FollowUpStatus.CANCELLED);
+            followUpRepository.save(followUp);
+        }
+    }
+
     private String generateVisitNumber() {
         long count = visitRepository.count() + 1;
 
@@ -104,6 +168,9 @@ public class VisitService {
                 .diagnosis(visit.getDiagnosis())
                 .followUpRequired(visit.getFollowUpRequired())
                 .nextReviewDate(visit.getNextReviewDate())
+                .reasonForVisit(visit.getReasonForVisit())
+                .treatment(visit.getTreatment())
+                .notes(visit.getNotes())
                 .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.example.backend.user;
 
+import com.example.backend.user.dto.CreateUserRequest;
 import com.example.backend.user.dto.UserDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,68 +13,45 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * REST Controller for user management operations.
- * Handles user CRUD operations with role-based authorization.
- */
 @Slf4j
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"}, 
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"},
              allowCredentials = "true", maxAge = 3600)
 public class UserController {
 
     private final UserService userService;
 
-    /**
-     * Get all users.
-     * GET /api/users
-     * @return list of all users
-     */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         log.info("Fetching all users");
-        List<UserDTO> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    /**
-     * Get user by ID.
-     * GET /api/users/{id}
-     * @param id user ID
-     * @return user information
-     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         log.info("Fetching user with ID: {}", id);
-        UserDTO user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    /**
-     * Get user by username.
-     * GET /api/users/username/{username}
-     * @param username username
-     * @return user information
-     */
     @GetMapping("/username/{username}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username) {
         log.info("Fetching user with username: {}", username);
-        UserDTO user = userService.getUserByUsername(username);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
-    /**
-     * Update user information.
-     * PUT /api/users/{id}
-     * @param id user ID
-     * @param updateRequest map containing fields to update
-     * @return updated user information
-     */
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserDTO> createUser(@RequestBody CreateUserRequest request) {
+        log.info("Admin creating user: {}", request.getUsername());
+        UserDTO created = userService.createUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> updateUser(
@@ -84,57 +62,35 @@ public class UserController {
         String fullName = updateRequest.get("fullName");
         String email = updateRequest.get("email");
         String phoneNumber = updateRequest.get("phoneNumber");
+        String role = updateRequest.get("role");
 
-        UserDTO updatedUser = userService.updateUser(id, fullName, email, phoneNumber);
+        UserDTO updatedUser = userService.updateUser(id, fullName, email, phoneNumber, role);
         return ResponseEntity.ok(updatedUser);
     }
 
-    /**
-     * Activate user.
-     * PUT /api/users/{id}/activate
-     * @param id user ID
-     * @return updated user information
-     */
     @PutMapping("/{id}/activate")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> activateUser(@PathVariable Long id) {
         log.info("Activating user with ID: {}", id);
-        UserDTO updatedUser = userService.setUserActive(id, true);
-        return ResponseEntity.ok(updatedUser);
+        return ResponseEntity.ok(userService.setUserActive(id, true));
     }
 
-    /**
-     * Deactivate user.
-     * PUT /api/users/{id}/deactivate
-     * @param id user ID
-     * @return updated user information
-     */
     @PutMapping("/{id}/deactivate")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> deactivateUser(@PathVariable Long id) {
         log.info("Deactivating user with ID: {}", id);
-        UserDTO updatedUser = userService.setUserActive(id, false);
-        return ResponseEntity.ok(updatedUser);
+        return ResponseEntity.ok(userService.setUserActive(id, false));
     }
 
-    /**
-     * Delete user.
-     * DELETE /api/users/{id}
-     * @param id user ID
-     * @return deletion confirmation
-     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         log.warn("Deleting user with ID: {}", id);
-        
-        // Get user to verify it exists
-        userService.getUserById(id);
+        userService.deleteUser(id);
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "User deletion would be implemented here");
+        response.put("message", "User deleted successfully");
         response.put("userId", String.valueOf(id));
-
         return ResponseEntity.ok(response);
     }
 }

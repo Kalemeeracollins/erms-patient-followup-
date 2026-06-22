@@ -4,6 +4,7 @@ com\example\backend\auth\dto\LoginResponse$UserInfo.class
 com\example\backend\auth\dto\RegisterRequest$RegisterRequestBuilder.class
 com\example\backend\followup\FollowUpRequest.class
 com\example\backend\notification\NotificationController.class
+com\example\backend\notification\NotificationProperties.class
 com\example\backend\report\MonthlyReportResponse$MonthlyReportResponseBuilder.class
 com\example\backend\common\exception\GlobalExceptionHandler.class
 com\example\backend\auth\AuthService.class
@@ -21,9 +22,11 @@ com\example\backend\dashboard\DashboardResponse$DashboardResponseBuilder.class
 com\example\backend\auth\dto\LoginRequest.class
 com\example\backend\user\UserController.class
 com\example\backend\followup\FollowUp$FollowUpBuilder.class
+com\example\backend\notification\NotificationDeliveryService$1.class
 com\example\backend\security\JwtAuthenticationEntryPoint.class
 com\example\backend\followup\FollowUpResponse$FollowUpResponseBuilder.class
 com\example\backend\common\exception\BadRequestException.class
+com\example\backend\notification\NotificationDeliveryService.class
 com\example\backend\patient\PatientRequest.class
 com\example\backend\patient\PatientRepository.class
 com\example\backend\report\ReportController.class
@@ -51,6 +54,7 @@ com\example\backend\visit\VisitRequest.class
 com\example\backend\notification\NotificationRequest.class
 com\example\backend\visit\Visit$VisitBuilder.class
 com\example\backend\visit\VisitEntity.class
+com\example\backend\user\dto\CreateUserRequest.class
 com\example\backend\user\UserService.class
 com\example\backend\notification\NotificationChannel.class
 com\example\backend\dashboard\DashboardController.class

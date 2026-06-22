@@ -23,4 +23,8 @@ public class PatientResponse {
     private String email;
 
     private Boolean active;
+
+    private Boolean deceased;
+
+    private String dateOfBirth;
 }

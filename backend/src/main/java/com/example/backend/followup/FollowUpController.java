@@ -124,8 +124,15 @@ public class FollowUpController {
         return ResponseEntity.ok(
                 followUpService.rescheduleFollowUp(
                         id,
-                        request.getNewDate()
+                        request.getNewDate(),
+                        request.getReason()
                 )
         );
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<String> cancelFollowUp(@PathVariable Long id) {
+        followUpService.cancelFollowUp(id);
+        return ResponseEntity.ok("Follow-up cancelled");
     }
 }

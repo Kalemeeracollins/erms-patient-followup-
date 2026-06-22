@@ -104,38 +104,62 @@ public class PatientController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/{id}/activate")
+    public ResponseEntity<PatientResponse> activatePatient(@PathVariable Long id) {
+        return patientRepository.findById(id)
+                .map(patient -> {
+                    patient.setActive(true);
+                    return ResponseEntity.ok(toResponse(patientRepository.save(patient)));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/deactivate")
+    public ResponseEntity<PatientResponse> deactivatePatient(@PathVariable Long id) {
+        return patientRepository.findById(id)
+                .map(patient -> {
+                    patient.setActive(false);
+                    return ResponseEntity.ok(toResponse(patientRepository.save(patient)));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/deceased")
+    public ResponseEntity<PatientResponse> markDeceased(@PathVariable Long id) {
+        return patientRepository.findById(id)
+                .map(patient -> {
+                    patient.setDeceased(true);
+                    patient.setActive(false);
+                    return ResponseEntity.ok(toResponse(patientRepository.save(patient)));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     private String generatePatientNumber() {
         long count = patientRepository.count() + 1;
         return "PAT-" + Year.now().getValue() + "-" + String.format("%05d", count);
     }
 
     private PatientResponse toResponse(Patient patient) {
-
-    Integer age = null;
-
-    if (patient.getDateOfBirth() != null) {
-        age = java.time.Period.between(
-                patient.getDateOfBirth(),
-                java.time.LocalDate.now()
-        ).getYears();
-    }
-
-    return PatientResponse.builder()
-            .id(patient.getId())
-            .patientNumber(patient.getPatientNumber())
-            .fullName(
-                    patient.getFirstName() + " " +
-                    patient.getLastName()
-            )
-            .gender(
-                    patient.getGender() != null
-                            ? patient.getGender().name()
-                            : null
-            )
-            .age(age)
-            .phoneNumber(patient.getPhoneNumber())
-            .email(patient.getEmail())
-            .active(patient.getActive())
-            .build();
+        Integer age = null;
+        if (patient.getDateOfBirth() != null) {
+            age = java.time.Period.between(
+                    patient.getDateOfBirth(),
+                    java.time.LocalDate.now()
+            ).getYears();
         }
+
+        return PatientResponse.builder()
+                .id(patient.getId())
+                .patientNumber(patient.getPatientNumber())
+                .fullName(patient.getFirstName() + " " + patient.getLastName())
+                .gender(patient.getGender() != null ? patient.getGender().name() : null)
+                .age(age)
+                .phoneNumber(patient.getPhoneNumber())
+                .email(patient.getEmail())
+                .active(patient.getActive())
+                .deceased(patient.getDeceased())
+                .dateOfBirth(patient.getDateOfBirth() != null ? patient.getDateOfBirth().toString() : null)
+                .build();
+    }
 }

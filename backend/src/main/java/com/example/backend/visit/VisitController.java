@@ -51,4 +51,12 @@ public class VisitController {
                 visitService.getVisitsByPatient(patientId)
         );
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<VisitResponse> updateVisit(
+            @PathVariable Long id,
+            @RequestBody VisitRequest request) {
+
+        return ResponseEntity.ok(visitService.updateVisit(id, request));
+    }
 }

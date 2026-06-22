@@ -1,8 +1,10 @@
 package com.example.backend.user;
 
 import com.example.backend.audit.AuditService;
+import com.example.backend.user.Role;
 import com.example.backend.common.exception.ResourceNotFoundException;
 import com.example.backend.common.exception.BadRequestException;
+import com.example.backend.user.dto.CreateUserRequest;
 import com.example.backend.user.dto.UserDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,13 +85,12 @@ public class UserService {
      * @return updated UserDTO
      * @throws ResourceNotFoundException if user not found
      */
-    public UserDTO updateUser(Long id, String fullName, String email, String phoneNumber) {
+    public UserDTO updateUser(Long id, String fullName, String email, String phoneNumber, String role) {
         log.debug("Updating user with ID: {}", id);
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
 
-        // Check if email is already in use by another user
         if (email != null && !email.equals(user.getEmail()) && userRepository.existsByEmail(email)) {
             log.warn("Email already in use: {}", email);
             throw new BadRequestException("Email already in use");
@@ -101,8 +102,15 @@ public class UserService {
         if (email != null && !email.isBlank()) {
             user.setEmail(email);
         }
-        if (phoneNumber != null && !phoneNumber.isBlank()) {
-            user.setPhoneNumber(phoneNumber);
+        if (phoneNumber != null) {
+            user.setPhoneNumber(phoneNumber.isBlank() ? null : phoneNumber);
+        }
+        if (role != null && !role.isBlank()) {
+            try {
+                user.setRole(Role.valueOf(role.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid role: " + role);
+            }
         }
 
         User updatedUser = userRepository.save(user);
@@ -110,6 +118,44 @@ public class UserService {
         auditService.logUserUpdate(id, fullName, email);
 
         return convertToDTO(updatedUser);
+    }
+
+    public UserDTO createUser(CreateUserRequest request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new BadRequestException("Username already exists");
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new BadRequestException("Email already in use");
+        }
+
+        Role role;
+        try {
+            role = Role.valueOf(request.getRole().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid role: " + request.getRole());
+        }
+
+        User user = User.builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getFullName())
+                .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .role(role)
+                .active(true)
+                .build();
+
+        User saved = userRepository.save(user);
+        auditService.logUserCreation(saved.getId(), saved.getUsername());
+        log.info("Admin created user: {}", saved.getUsername());
+        return convertToDTO(saved);
+    }
+
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
+        userRepository.delete(user);
+        log.info("User deleted: ID={}", id);
     }
 
     /**
